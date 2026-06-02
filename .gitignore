@@ -1,0 +1,32 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies (将来Node導入したとき用)
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Vercel
+.vercel/
+
+# Env
+.env
+.env.local
+.env.*.local

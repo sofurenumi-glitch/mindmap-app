@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#1e293b" />
+  <title>MindMap — 初期値は、愛</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='10' fill='%231e293b'/%3E%3Ccircle cx='6' cy='8' r='4' fill='%230284c7'/%3E%3Ccircle cx='6' cy='24' r='4' fill='%23059669'/%3E%3Ccircle cx='26' cy='10' r='4' fill='%23d97706'/%3E%3Ccircle cx='26' cy='22' r='4' fill='%23db2777'/%3E%3C/svg%3E" />
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #0284c7;
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
+      --c0: #1e293b;
+      --c1: #0284c7;
+      --c2: #059669;
+      --c3: #d97706;
+      --c4: #db2777;
+      --c5: #7c3aed;
+      --c6: #64748b;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+      overscroll-behavior: none;
+    }
+    body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+    /* ── ヘッダー ────────────────────────────────────────── */
+    header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      z-index: 10;
+    }
+    header .title-wrap {
+      display: flex; align-items: center; gap: 8px;
+      flex: 1 1 220px; min-width: 0;
+    }
+    header .logo {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--c0), var(--c1));
+      display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 14px;
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: 14px; margin: 0; color: var(--muted); font-weight: 600; letter-spacing: 0.02em;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    header h1 span { color: var(--c4); }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    button {
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); border-radius: 8px; cursor: pointer;
+      transition: background-color .15s ease, border-color .15s ease, transform .05s ease;
+      display: inline-flex; align-items: center; gap: 4px;
+      min-height: 36px;
+      user-select: none;
+    }
+    button:hover { background: #f1f5f9; border-color: #cbd5e1; }
+    button:active { transform: translateY(1px); }
+    button.primary { background: var(--c1); color: #fff; border-color: var(--c1); }
+    button.primary:hover { background: #0369a1; }
+    button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+    button .icon { font-size: 14px; }
+
+    /* ── メイン ────────────────────────────────────────── */
+    main {
+      flex: 1; display: flex; min-height: 0; position: relative;
+    }
+    #editor-pane {
+      width: 42%;
+      min-width: 280px;
+      display: flex; flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+    #editor-pane .editor-header {
+      padding: 8px 14px;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* エディタツールバー */
+    .editor-toolbar {
+      display: flex; gap: 4px; padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+      flex-wrap: wrap;
+    }
+    .editor-toolbar button {
+      min-height: 40px; padding: 0 12px;
+      font-size: 13px; font-weight: 600;
+      background: var(--surface);
+    }
+    .editor-toolbar .spacer { flex: 1; }
+    .editor-toolbar .hint {
+      font-size: 11px; color: var(--muted); align-self: center;
+      padding-right: 4px;
+    }
+
+    #editor {
+      flex: 1; width: 100%; resize: none; border: none; outline: none;
+      padding: 18px 16px;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 16px; line-height: 1.85;
+      color: var(--text); background: var(--surface);
+      tab-size: 2;
+      -webkit-text-size-adjust: 100%;
+    }
+    #editor:focus { background: #fefefe; }
+
+    #view-pane {
+      flex: 1; min-width: 0;
+      position: relative; overflow: hidden;
+      background:
+        radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0);
+      background-size: 24px 24px;
+      touch-action: none;
+    }
+    #mindmap {
+      display: block;
+      width: 100%; height: 100%;
+      cursor: grab;
+      touch-action: none;
+      user-select: none; -webkit-user-select: none;
+    }
+    #mindmap.panning { cursor: grabbing; }
+    #mindmap.node-dragging { cursor: grabbing; }
+    #mindmap .node { cursor: pointer; }
+    #mindmap .node .node-bg { transition: filter .12s ease; }
+    #mindmap .node:hover .node-bg { filter: brightness(1.08); }
+    #mindmap .node.selected .node-bg { stroke: #0f172a; stroke-width: 3; }
+    #mindmap .node.drag-source .node-bg { opacity: 0.35; }
+    #mindmap .node.drop-target .node-bg {
+      stroke: #f59e0b; stroke-width: 4;
+      filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.55));
+    }
+    #mindmap .add-btn { cursor: pointer; opacity: 0; transition: opacity .15s; }
+    #mindmap .node:hover .add-btn, #mindmap .node.selected .add-btn { opacity: 1; }
+    @media (hover: none) { #mindmap .add-btn { opacity: 1; } }
+    #mindmap .drag-ghost { pointer-events: none; }
+
+    /* ── ズーム/パンのコントロール ───────────────────────── */
+    .zoom-pill {
+      position: absolute; right: 12px; bottom: 12px;
+      background: rgba(255,255,255,.96); backdrop-filter: blur(10px);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 6px;
+      display: flex; gap: 4px; align-items: center;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, .1);
+      z-index: 5;
+    }
+    .zoom-pill button {
+      min-height: 36px; min-width: 36px; padding: 0 8px;
+      border-color: transparent; background: transparent;
+    }
+    .zoom-pill button:hover { background: #f1f5f9; }
+    .zoom-pill .zoom-level {
+      min-width: 48px; text-align: center;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+      user-select: none;
+    }
+
+    /* ── ステータスバー ──────────────────────────────────── */
+    .status-bar {
+      position: absolute; left: 12px; bottom: 12px;
+      background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+      border: 1px solid var(--border); border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px; color: var(--muted);
+      display: flex; gap: 10px; align-items: center;
+      box-shadow: var(--shadow);
+      z-index: 5;
+    }
+    .status-bar .legend { display: flex; gap: 6px; align-items: center; }
+    .status-bar .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+    /* ── トースト ────────────────────────────────────────── */
+    .toast {
+      position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%) translateY(20px);
+      background: var(--c0); color: #fff; padding: 10px 18px;
+      border-radius: 999px; font-size: 13px; font-weight: 600;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, .25);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── モバイル ────────────────────────────────────────── */
+    .mobile-toggle { display: none; }
+    @media (max-width: 768px) {
+      header { padding: 8px 10px; gap: 6px; }
+      header h1 { font-size: 12px; }
+      button { padding: 7px 10px; font-size: 12px; min-height: 36px; }
+      main { flex-direction: column; }
+      #editor-pane { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+      main.view-mindmap #editor-pane { display: none; }
+      main.view-editor #view-pane { display: none; }
+      main.view-split #editor-pane { height: 45%; }
+      main.view-split #view-pane { height: 55%; }
+      .mobile-toggle { display: inline-flex; }
+      .desktop-only { display: none !important; }
+      #editor { font-size: 17px; line-height: 1.9; padding: 16px 14px; }
+      .editor-toolbar button { min-height: 44px; padding: 0 14px; font-size: 14px; }
+      .editor-toolbar .hint { display: none; }
+      .status-bar { font-size: 11px; left: 8px; bottom: 8px; padding: 5px 8px; }
+      .status-bar .legend-text { display: none; }
+      .zoom-pill { right: 8px; bottom: 8px; }
+      .zoom-pill button { min-height: 44px; min-width: 44px; }
+    }
+
+    /* ── ダイアログ ───────────────────────────────────────── */
+    dialog {
+      border: none; border-radius: 16px; padding: 0;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+      max-width: 92vw; width: 460px;
+    }
+    dialog::backdrop { background: rgba(15, 23, 42, .4); backdrop-filter: blur(4px); }
+    dialog .dialog-body { padding: 22px 24px; }
+    dialog h2 { margin: 0 0 14px; font-size: 16px; }
+    dialog .dialog-input {
+      width: 100%; padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 16px; font-family: inherit; line-height: 1.6;
+      margin-bottom: 8px;
+      resize: vertical; min-height: 56px; max-height: 50vh;
+    }
+    dialog .dialog-input:focus { outline: none; border-color: var(--c1); box-shadow: 0 0 0 3px rgba(2,132,199,0.15); }
+    dialog .dialog-hint {
+      font-size: 11px; color: var(--muted); margin-bottom: 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    dialog .dialog-hint kbd {
+      font-family: ui-monospace, Menlo, monospace; font-size: 10px;
+      background: #f1f5f9; border: 1px solid var(--border);
+      padding: 1px 6px; border-radius: 4px; color: var(--text);
+    }
+    dialog .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    dialog .dialog-actions button { min-height: 40px; padding: 0 16px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-wrap">
+      <div class="logo">M</div>
+      <h1>MindMap <span>—</span> 初期値は、愛</h1>
+    </div>
+    <div class="btn-group">
+      <button id="btn-toggle" class="mobile-toggle ghost" title="表示切替">
+        <span class="icon">⇄</span><span>表示</span>
+      </button>
+      <button id="btn-upload" title=".md読み込み">
+        <span class="icon">📥</span><span class="desktop-only">読込</span>
+      </button>
+      <button id="btn-download" title=".mdダウンロード">
+        <span class="icon">💾</span><span class="desktop-only">保存</span>
+      </button>
+      <button id="btn-share" class="primary" title="共有URLをコピー">
+        <span class="icon">🔗</span><span>共有</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="view-split">
+    <section id="editor-pane">
+      <div class="editor-header">
+        <span>📝 Markdownエディタ</span>
+        <span id="char-count">0 文字</span>
+      </div>
+      <div class="editor-toolbar">
+        <button data-action="outdent" title="アウトデント (Shift+Tab)">⇤</button>
+        <button data-action="indent" title="インデント (Tab)">⇥</button>
+        <button data-action="newbullet" title="同じ階層に新しい枝を追加">＋ 枝</button>
+        <button data-action="newchild" title="子の枝を追加">＋ 子</button>
+        <span class="spacer"></span>
+        <span class="hint">Enter→自動箇条書き / Tab→深く</span>
+      </div>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+        placeholder="# 中央のテーマ&#10;&#10;- 大きな枝&#10;  - 小さな枝&#10;  - もうひとつの枝&#10;- もう一本"></textarea>
+    </section>
+
+    <section id="view-pane">
+      <svg id="mindmap" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div class="status-bar">
+        <span id="node-count">0 ノード</span>
+        <span style="color:#cbd5e1">|</span>
+        <div class="legend">
+          <span class="legend-text">階層:</span>
+          <span class="dot" style="background:var(--c0)" title="ルート"></span>
+          <span class="dot" style="background:var(--c1)" title="L1"></span>
+          <span class="dot" style="background:var(--c2)" title="L2"></span>
+          <span class="dot" style="background:var(--c3)" title="L3"></span>
+          <span class="dot" style="background:var(--c4)" title="L4"></span>
+          <span class="dot" style="background:var(--c5)" title="L5"></span>
+        </div>
+      </div>
+
+      <div class="zoom-pill">
+        <button id="btn-zoom-out" title="縮小">−</button>
+        <span class="zoom-level" id="zoom-level">100%</span>
+        <button id="btn-zoom-in" title="拡大">+</button>
+        <button id="btn-zoom-fit" title="全体を表示">⤢</button>
+      </div>
+    </section>
+  </main>
+
+  <input type="file" id="file-input" accept=".md,.markdown,.txt" hidden />
+  <div id="toast" class="toast"></div>
+
+  <dialog id="dialog-edit">
+    <div class="dialog-body">
+      <h2 id="dialog-title">ノードを編集</h2>
+      <textarea id="dialog-input" class="dialog-input" rows="3" spellcheck="false" autocomplete="off"></textarea>
+      <div class="dialog-hint">
+        <span><kbd>Enter</kbd> 改行 / <kbd>⌘/Ctrl + Enter</kbd> 決定 / <kbd>Esc</kbd> 取消</span>
+        <span id="dialog-char-count" style="color:var(--muted);"></span>
+      </div>
+      <div class="dialog-actions">
+        <button id="dialog-cancel">キャンセル</button>
+        <button id="dialog-ok" class="primary">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    'use strict';
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+
+    // ════════════════════════════════════════════════════
+    // 1. 色パレット
+    // ════════════════════════════════════════════════════
+    const COLORS = ['#1e293b','#0284c7','#059669','#d97706','#db2777','#7c3aed','#64748b'];
+    const colorFor = d => COLORS[Math.min(d, COLORS.length - 1)];
+
+    // ════════════════════════════════════════════════════
+    // 2. 初期サンプル
+    // ════════════════════════════════════════════════════
+    const SAMPLE = `# 想夫恋 宇美店
+
+- 数字（経営）
+  - F0回収日数 16日
+  - 粗利率 50〜60%
+  - 月商 200万
+- 商品
+  - 焼そば
+  - ふりかけ（店外拡張）
+  - 食事券
+- 想い
+  - 初期値は、愛
+  - 循環する設計
+  - 気持ちの行き先
+- 並走プロジェクト
+  - BOOKS Terminal
+  - Fukuoka connect
+  - うみまち
+`;
+
+    // ════════════════════════════════════════════════════
+    // 3. DOM参照
+    // ════════════════════════════════════════════════════
+    const editor = document.getElementById('editor');
+    const svg = document.getElementById('mindmap');
+    const main = document.querySelector('main');
+
+    // ════════════════════════════════════════════════════
+    // 4. 状態
+    // ════════════════════════════════════════════════════
+    let tree = null;
+    let allNodes = [];
+    let selectedNodeId = null;
+    let canvasG = null;     // 全コンテンツを内包する <g>（pan/zoomのターゲット）
+    let ghostG = null;      // ドラッグ中のゴースト
+
+    // view transform
+    const view = { scale: 1, tx: 0, ty: 0 };
+
+    // インタラクション
+    let dragState = null;   // { type: 'pan' | 'node-press' | 'node-drag' | 'pinch', ... }
+    const pointers = new Map(); // pointerId → {x, y}
+
+    // ════════════════════════════════════════════════════
+    // 5. Markdownパーサ
+    // ════════════════════════════════════════════════════
+    function parseMarkdown(md) {
+      const lines = md.split(/\r?\n/);
+      let rootText = 'マインドマップ';
+      const firstHeading = lines.find(l => /^#\s+\S/.test(l));
+      if (firstHeading) rootText = firstHeading.replace(/^#\s+/, '').trim();
+
+      let idCounter = 0;
+      const root = { id: 'n' + (idCounter++), text: rootText, depth: 0, children: [], parent: null };
+      const stack = [{ node: root, depth: 0 }];
+      let firstHeadingConsumed = false;
+      let headingBaseDepth = 0;
+      let lastNode = null;          // 継続行（改行）を追加する対象
+      let lastIndentCol = 0;        // lastNode の本文開始カラム
+
+      for (const raw of lines) {
+        // 空行：継続を切らない（ノード内空行を1行として保持する場合は別途）
+        if (!raw.trim()) continue;
+
+        // タイトル（最初の # 行）
+        if (/^#\s+\S/.test(raw) && !firstHeadingConsumed) {
+          firstHeadingConsumed = true;
+          lastNode = root; lastIndentCol = 2;   // "# " の右
+          continue;
+        }
+
+        // ## 以降の見出し
+        const head = raw.match(/^(#{2,6})\s+(.+?)\s*$/);
+        if (head) {
+          const depth = head[1].length - 1;
+          const node = { id: 'n' + (idCounter++), text: head[2].trim(), depth, children: [], parent: null };
+          while (stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+          const parent = stack[stack.length - 1].node;
+          node.parent = parent; parent.children.push(node);
+          stack.push({ node, depth });
+          headingBaseDepth = depth;
+          lastNode = node; lastIndentCol = head[1].length + 1;
+          continue;
+        }
+
+        // 箇条書き
+        const bullet = raw.match(/^(\s*)([-*+])\s+(.+?)\s*$/);
+        if (bullet) {
+          const indentChars = bullet[1].replace(/\t/g, '  ');
+          const indent = indentChars.length;
+          const depth = headingBaseDepth + 1 + Math.floor(indent / 2);
+          const node = { id: 'n' + (idCounter++), text: bullet[3].trim(), depth, children: [], parent: null };
+          while (stack.length > 1 && stack[stack.length - 1].depth >= depth) stack.pop();
+          const parent = stack[stack.length - 1].node;
+          node.parent = parent; parent.children.push(node);
+          stack.push({ node, depth });
+          lastNode = node; lastIndentCol = indent + 2;  // "- " の右
+          continue;
+        }
+
+        // 継続行：インデントがある非箇条書き行で、直近ノードの本文より右にあるなら改行扱い
+        const contMatch = raw.match(/^(\s+)(\S.*?)\s*$/);
+        if (contMatch && lastNode) {
+          const indentChars = contMatch[1].replace(/\t/g, '  ');
+          if (indentChars.length >= lastIndentCol) {
+            lastNode.text += '\n' + contMatch[2];
+            continue;
+          }
+        }
+      }
+      return root;
+    }
+
+    function treeToMarkdown(root) {
+      const lines = [];
+      // ルートタイトル（複数行対応）
+      const rootLines = root.text.split('\n');
+      lines.push(`# ${rootLines[0]}`);
+      for (let i = 1; i < rootLines.length; i++) lines.push(`  ${rootLines[i]}`);
+      lines.push('');
+      function walk(node, depth) {
+        const indent = '  '.repeat(depth - 1);
+        const contIndent = indent + '  '; // "- " の右
+        const tLines = node.text.split('\n');
+        lines.push(`${indent}- ${tLines[0]}`);
+        for (let i = 1; i < tLines.length; i++) lines.push(`${contIndent}${tLines[i]}`);
+        node.children.forEach(c => walk(c, depth + 1));
+      }
+      root.children.forEach(c => walk(c, 1));
+      return lines.join('\n') + '\n';
+    }
+
+    function flatten(root) {
+      const out = []; (function w(n){ out.push(n); n.children.forEach(w); })(root); return out;
+    }
+    function findById(id) { return allNodes.find(n => n.id === id); }
+    function isDescendant(maybeDesc, ancestor) {
+      let p = maybeDesc; while (p) { if (p === ancestor) return true; p = p.parent; } return false;
+    }
+
+    // ════════════════════════════════════════════════════
+    // 6. テキスト幅計測
+    // ════════════════════════════════════════════════════
+    function measureText(text, fontSize, weight) {
+      const t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('font-size', fontSize);
+      t.setAttribute('font-weight', weight);
+      t.setAttribute('font-family', 'system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif');
+      t.style.visibility = 'hidden';
+      t.textContent = text;
+      svg.appendChild(t);
+      const w = t.getBBox().width;
+      svg.removeChild(t);
+      return w;
+    }
+
+    // ════════════════════════════════════════════════════
+    // 7. レイアウト（横ツリー）
+    // ════════════════════════════════════════════════════
+    const X_GAP = 60, Y_GAP = 12, PAD = 32;
+    const contentBounds = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+
+    function computeLayout() {
+      allNodes.forEach(n => {
+        const isRoot = n.depth === 0;
+        n.fontSize = isRoot ? 18 : (n.depth === 1 ? 15 : 13);
+        n.weight = isRoot ? 700 : (n.depth === 1 ? 600 : 500);
+        // 複数行対応：最長行で幅を決め、行数で高さを決める
+        const rawLines = n.text.split('\n');
+        n.lines = rawLines.length > 0 ? rawLines : [''];
+        let maxW = 0;
+        n.lines.forEach(line => {
+          const w = measureText(line || ' ', n.fontSize, n.weight);
+          if (w > maxW) maxW = w;
+        });
+        n.lineHeight = n.fontSize * 1.35;
+        n.boxW = Math.max(48, maxW + 28);
+        const padV = isRoot ? 14 : (n.depth === 1 ? 12 : 10);
+        const textH = n.lines.length * n.lineHeight;
+        const minH = isRoot ? 44 : (n.depth === 1 ? 36 : 30);
+        n.boxH = Math.max(minH, textH + padV);
+      });
+
+      function layoutY(node, top) {
+        if (node.children.length === 0) {
+          node.top = top; node.cy = top + node.boxH / 2;
+          return top + node.boxH + Y_GAP;
+        }
+        let cursor = top;
+        node.children.forEach(c => { cursor = layoutY(c, cursor); });
+        const f = node.children[0], l = node.children[node.children.length - 1];
+        node.cy = (f.cy + l.cy) / 2;
+        node.top = node.cy - node.boxH / 2;
+        return Math.max(cursor, node.top + node.boxH + Y_GAP);
+      }
+      function layoutX(node, left) {
+        node.left = left; node.cx = left + node.boxW / 2;
+        const childLeft = left + node.boxW + X_GAP;
+        node.children.forEach(c => layoutX(c, childLeft));
+      }
+      const bottomY = layoutY(tree, PAD);
+      layoutX(tree, PAD);
+
+      contentBounds.minX = Math.min(...allNodes.map(n => n.left));
+      contentBounds.minY = Math.min(...allNodes.map(n => n.top));
+      contentBounds.maxX = Math.max(...allNodes.map(n => n.left + n.boxW));
+      contentBounds.maxY = Math.max(...allNodes.map(n => n.top + n.boxH));
+    }
+
+    // ════════════════════════════════════════════════════
+    // 8. SVGビューポート
+    // ════════════════════════════════════════════════════
+    function resizeViewport() {
+      const r = svg.getBoundingClientRect();
+      const w = Math.max(1, r.width), h = Math.max(1, r.height);
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    }
+
+    function applyTransform() {
+      if (!canvasG) return;
+      canvasG.setAttribute('transform',
+        `translate(${view.tx},${view.ty}) scale(${view.scale})`);
+      document.getElementById('zoom-level').textContent = `${Math.round(view.scale * 100)}%`;
+    }
+
+    function clientToWorld(cx, cy) {
+      const r = svg.getBoundingClientRect();
+      return {
+        x: (cx - r.left - view.tx) / view.scale,
+        y: (cy - r.top  - view.ty) / view.scale,
+      };
+    }
+
+    function fitContent(animate = false) {
+      if (!tree) return;
+      resizeViewport();
+      const r = svg.getBoundingClientRect();
+      const cw = contentBounds.maxX - contentBounds.minX + PAD * 2;
+      const ch = contentBounds.maxY - contentBounds.minY + PAD * 2;
+      const m = 24;
+      const sx = (r.width - m * 2) / cw;
+      const sy = (r.height - m * 2) / ch;
+      const s = Math.min(sx, sy, 1.2);
+      view.scale = s;
+      view.tx = (r.width - cw * s) / 2 - (contentBounds.minX - PAD) * s;
+      view.ty = (r.height - ch * s) / 2 - (contentBounds.minY - PAD) * s;
+      applyTransform();
+    }
+
+    // ════════════════════════════════════════════════════
+    // 9. レンダリング
+    // ════════════════════════════════════════════════════
+    function el(tag, attrs) {
+      const e = document.createElementNS(SVG_NS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    }
+
+    function render(opts = {}) {
+      tree = parseMarkdown(editor.value);
+      allNodes = flatten(tree);
+      computeLayout();
+
+      resizeViewport();
+      svg.innerHTML = '';
+      canvasG = el('g', { id: 'canvas' });
+      svg.appendChild(canvasG);
+      applyTransform();
+
+      // コネクタ
+      allNodes.forEach(parent => {
+        parent.children.forEach(child => {
+          const x1 = parent.left + parent.boxW, y1 = parent.cy;
+          const x2 = child.left, y2 = child.cy;
+          const mx = (x1 + x2) / 2;
+          canvasG.appendChild(el('path', {
+            d: `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`,
+            stroke: colorFor(child.depth),
+            'stroke-width': child.depth <= 1 ? 2.5 : 2,
+            fill: 'none', opacity: 0.5,
+          }));
+        });
+      });
+
+      // ノード
+      allNodes.forEach(n => {
+        const g = el('g', { class: 'node', 'data-id': n.id });
+        if (selectedNodeId === n.id) g.setAttribute('class', 'node selected');
+
+        // 単行ノードはピル型（高さの半分の角丸）、複数行は角丸長方形
+        const radius = n.lines.length > 1 ? Math.min(14, n.boxH / 4) : n.boxH / 2;
+        g.appendChild(el('rect', {
+          class: 'node-bg',
+          x: n.left, y: n.top, width: n.boxW, height: n.boxH,
+          rx: radius, ry: radius,
+          fill: colorFor(n.depth),
+        }));
+        // 複数行テキスト：tspanで縦に積む
+        const text = el('text', {
+          'text-anchor': 'middle',
+          fill: '#fff', 'font-size': n.fontSize, 'font-weight': n.weight,
+          'font-family': 'system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif',
+          'pointer-events': 'none',
+        });
+        const firstLineY = n.cy - (n.lines.length - 1) / 2 * n.lineHeight;
+        n.lines.forEach((line, i) => {
+          const tspan = document.createElementNS(SVG_NS, 'tspan');
+          tspan.setAttribute('x', n.cx);
+          tspan.setAttribute('y', firstLineY + i * n.lineHeight);
+          tspan.setAttribute('dominant-baseline', 'central');
+          tspan.textContent = line || ' ';
+          text.appendChild(tspan);
+        });
+        g.appendChild(text);
+
+        // 「+」追加ボタン
+        const plusCx = n.left + n.boxW + 14, plusCy = n.cy;
+        const addG = el('g', { class: 'add-btn', 'data-add': n.id });
+        addG.appendChild(el('circle', {
+          cx: plusCx, cy: plusCy, r: 10,
+          fill: '#fff', stroke: colorFor(n.depth), 'stroke-width': 1.5,
+        }));
+        const plus = el('text', {
+          x: plusCx, y: plusCy + 0.5,
+          'text-anchor': 'middle', 'dominant-baseline': 'central',
+          fill: colorFor(n.depth), 'font-size': 14, 'font-weight': 700,
+          'pointer-events': 'none',
+        });
+        plus.textContent = '+';
+        addG.appendChild(plus);
+        g.appendChild(addG);
+
+        canvasG.appendChild(g);
+      });
+
+      // ステータス
+      document.getElementById('node-count').textContent = `${allNodes.length} ノード`;
+      document.getElementById('char-count').textContent = `${editor.value.length} 文字`;
+
+      if (opts.fit) fitContent();
+    }
+
+    // ════════════════════════════════════════════════════
+    // 10. ノードの編集ロジック
+    // ════════════════════════════════════════════════════
+    function editNode(id) {
+      const node = findById(id); if (!node) return;
+      const title = node === tree ? 'タイトルを編集（改行OK）' : 'ノードを編集（改行OK／空欄で削除）';
+      openDialog(title, node.text, (val) => {
+        if (val === null) return;
+        if (val === '' && node !== tree) {
+          const p = node.parent;
+          p.children = p.children.filter(c => c !== node);
+        } else if (val !== '') {
+          node.text = val;
+        }
+        editor.value = treeToMarkdown(tree);
+        saveLocal();
+        render();
+      });
+    }
+
+    function addChild(parentId, text) {
+      const p = findById(parentId); if (!p) return;
+      p.children.push({ id: 'tmp', text, depth: p.depth + 1, children: [], parent: p });
+      editor.value = treeToMarkdown(tree);
+      saveLocal();
+      render();
+    }
+
+    function reparent(nodeId, newParentId) {
+      if (nodeId === newParentId) return false;
+      const node = findById(nodeId), np = findById(newParentId);
+      if (!node || !np || !node.parent) return false;
+      if (isDescendant(np, node)) return false; // 子孫には移動できない
+      if (node.parent === np) return false;     // 既に親
+      node.parent.children = node.parent.children.filter(c => c !== node);
+      np.children.push(node);
+      node.parent = np;
+      editor.value = treeToMarkdown(tree);
+      saveLocal();
+      return true;
+    }
+
+    // ════════════════════════════════════════════════════
+    // 11. ダイアログ
+    // ════════════════════════════════════════════════════
+    const dlg = document.getElementById('dialog-edit');
+    const dlgInput = document.getElementById('dialog-input');
+    const dlgTitle = document.getElementById('dialog-title');
+    let dlgCallback = null;
+    function openDialog(title, value, cb) {
+      dlgTitle.textContent = title;
+      dlgInput.value = value;
+      dlgCallback = cb;
+      document.getElementById('dialog-char-count').textContent = `${value.length} 文字`;
+      if (typeof dlg.showModal === 'function') dlg.showModal();
+      // 内容に応じた初期高さ
+      dlgInput.style.height = 'auto';
+      dlgInput.style.height = Math.min(Math.max(dlgInput.scrollHeight + 4, 56), window.innerHeight * 0.5) + 'px';
+      setTimeout(() => { dlgInput.focus(); dlgInput.select(); }, 50);
+    }
+    function normalizeDialogValue(raw) {
+      // 各行の前後空白だけ削る（改行は保持）。全体が空白だけなら空文字
+      const trimmed = raw.split('\n').map(l => l.replace(/[ \t]+$/, '')).join('\n').trim();
+      return trimmed;
+    }
+    document.getElementById('dialog-ok').addEventListener('click', () => {
+      const v = normalizeDialogValue(dlgInput.value); dlg.close();
+      if (dlgCallback) dlgCallback(v);
+    });
+    document.getElementById('dialog-cancel').addEventListener('click', () => {
+      dlg.close(); if (dlgCallback) dlgCallback(null);
+    });
+    dlgInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault(); document.getElementById('dialog-ok').click();
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault(); document.getElementById('dialog-cancel').click();
+      }
+    });
+    dlgInput.addEventListener('input', () => {
+      document.getElementById('dialog-char-count').textContent = `${dlgInput.value.length} 文字`;
+      // 内容に合わせて高さを自動調整
+      dlgInput.style.height = 'auto';
+      dlgInput.style.height = Math.min(dlgInput.scrollHeight + 4, window.innerHeight * 0.5) + 'px';
+    });
+
+    // ════════════════════════════════════════════════════
+    // 12. ポインター操作（パン・ノードドラッグ・ピンチ）
+    // ════════════════════════════════════════════════════
+    const DRAG_THRESHOLD = 5;
+
+    function svgPointFromClient(cx, cy) {
+      const r = svg.getBoundingClientRect();
+      return { x: cx - r.left, y: cy - r.top };
+    }
+
+    function nodeIdFromEvent(target) {
+      const g = target.closest && target.closest('.node');
+      return g ? g.getAttribute('data-id') : null;
+    }
+    function addBtnIdFromEvent(target) {
+      const g = target.closest && target.closest('.add-btn');
+      return g ? g.getAttribute('data-add') : null;
+    }
+
+    function onPointerDown(e) {
+      if (e.button && e.button !== 0) return;
+      try { svg.setPointerCapture(e.pointerId); } catch {}
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      // 2点目 → ピンチへ
+      if (pointers.size === 2 && dragState?.type !== 'node-drag') {
+        const [a, b] = [...pointers.values()];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        dragState = { type: 'pinch', startDist: d, startScale: view.scale,
+          midX: (a.x + b.x) / 2, midY: (a.y + b.y) / 2 };
+        svg.classList.remove('panning');
+        return;
+      }
+
+      const addId = addBtnIdFromEvent(e.target);
+      if (addId) {
+        e.preventDefault(); e.stopPropagation();
+        openDialog('子ノードを追加', '', (val) => { if (val) { addChild(addId, val); } });
+        pointers.delete(e.pointerId);
+        return;
+      }
+
+      const nodeId = nodeIdFromEvent(e.target);
+      if (nodeId) {
+        dragState = {
+          type: 'node-press',
+          nodeId,
+          startX: e.clientX, startY: e.clientY,
+          startTime: Date.now(),
+        };
+      } else {
+        dragState = {
+          type: 'pan',
+          startX: e.clientX, startY: e.clientY,
+          startTx: view.tx, startTy: view.ty,
+        };
+        svg.classList.add('panning');
+      }
+    }
+
+    function onPointerMove(e) {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      // ピンチ更新
+      if (dragState?.type === 'pinch' && pointers.size >= 2) {
+        const [a, b] = [...pointers.values()].slice(0, 2);
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d > 0 && dragState.startDist > 0) {
+          const factor = d / dragState.startDist;
+          // 中点を基準にズーム
+          const mid = svgPointFromClient((a.x + b.x) / 2, (a.y + b.y) / 2);
+          const newScale = Math.max(0.15, Math.min(4, dragState.startScale * factor));
+          const wx = (mid.x - view.tx) / view.scale;
+          const wy = (mid.y - view.ty) / view.scale;
+          view.tx = mid.x - wx * newScale;
+          view.ty = mid.y - wy * newScale;
+          view.scale = newScale;
+          applyTransform();
+        }
+        return;
+      }
+
+      if (!dragState) return;
+      const dx = e.clientX - dragState.startX;
+      const dy = e.clientY - dragState.startY;
+      const dist = Math.hypot(dx, dy);
+
+      if (dragState.type === 'pan') {
+        view.tx = dragState.startTx + dx;
+        view.ty = dragState.startTy + dy;
+        applyTransform();
+        return;
+      }
+
+      if (dragState.type === 'node-press' && dist > DRAG_THRESHOLD) {
+        // ドラッグ開始
+        dragState.type = 'node-drag';
+        const node = findById(dragState.nodeId);
+        if (node === tree) {
+          // ルートはドラッグ不可（移動先がない）
+          dragState = null;
+          return;
+        }
+        svg.classList.add('node-dragging');
+        const srcEl = canvasG.querySelector(`.node[data-id="${node.id}"]`);
+        if (srcEl) srcEl.classList.add('drag-source');
+        createDragGhost(node);
+      }
+
+      if (dragState.type === 'node-drag') {
+        updateDragGhost(e.clientX, e.clientY);
+        const t = hitTestNode(e.clientX, e.clientY, dragState.nodeId);
+        // 既存のターゲットをクリア
+        canvasG.querySelectorAll('.node.drop-target').forEach(n => n.classList.remove('drop-target'));
+        if (t) {
+          canvasG.querySelector(`.node[data-id="${t.id}"]`)?.classList.add('drop-target');
+          dragState.target = t;
+        } else {
+          dragState.target = null;
+        }
+      }
+    }
+
+    function onPointerUp(e) {
+      pointers.delete(e.pointerId);
+
+      // ピンチ終了：1点になったらパンに戻すのではなく、ジェスチャ終了
+      if (dragState?.type === 'pinch') {
+        if (pointers.size < 2) dragState = null;
+        return;
+      }
+
+      if (!dragState) {
+        svg.classList.remove('panning', 'node-dragging');
+        return;
+      }
+
+      if (dragState.type === 'node-press') {
+        // タップ扱い → 編集
+        const id = dragState.nodeId;
+        dragState = null;
+        if (id) editNode(id);
+      } else if (dragState.type === 'node-drag') {
+        const { nodeId, target } = dragState;
+        cleanupDragVisuals();
+        dragState = null;
+        if (target && reparent(nodeId, target.id)) {
+          render();
+          toast(`「${findByIdFromTree(nodeId)?.text || ''}」を移動しました`);
+        } else if (target) {
+          // 移動できない（循環など）
+          toast('そこへは移動できません', true);
+        }
+      } else if (dragState.type === 'pan') {
+        dragState = null;
+        svg.classList.remove('panning');
+      }
+    }
+
+    function findByIdFromTree(id) {
+      // reparent後にも見つけられるよう、現ツリーから再探索
+      const flat = flatten(tree);
+      return flat.find(n => n.id === id);
+    }
+
+    function cleanupDragVisuals() {
+      svg.classList.remove('node-dragging', 'panning');
+      canvasG.querySelectorAll('.node.drop-target, .node.drag-source')
+        .forEach(n => n.classList.remove('drop-target', 'drag-source'));
+      if (ghostG && ghostG.parentNode) ghostG.parentNode.removeChild(ghostG);
+      ghostG = null;
+    }
+
+    // ── ヒットテスト：ノードを座標で検出 ────────────────────
+    function hitTestNode(cx, cy, excludeId) {
+      const els = document.elementsFromPoint(cx, cy);
+      const exclude = findById(excludeId);
+      for (const el of els) {
+        if (!el.closest) continue;
+        const g = el.closest('.node');
+        if (!g) continue;
+        const id = g.getAttribute('data-id');
+        if (!id || id === excludeId) continue;
+        const n = findById(id);
+        if (!n) continue;
+        // 自分の子孫にはドロップ不可
+        if (exclude && isDescendant(n, exclude)) continue;
+        return n;
+      }
+      return null;
+    }
+
+    // ── ゴースト ────────────────────────────────────────
+    function createDragGhost(node) {
+      ghostG = el('g', { class: 'drag-ghost', opacity: 0.85 });
+      const radius = node.lines.length > 1 ? Math.min(14, node.boxH / 4) : node.boxH / 2;
+      ghostG.appendChild(el('rect', {
+        x: node.left, y: node.top, width: node.boxW, height: node.boxH,
+        rx: radius, ry: radius,
+        fill: colorFor(node.depth),
+        stroke: '#0f172a', 'stroke-width': 2,
+        filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.25))',
+      }));
+      const text = el('text', {
+        'text-anchor': 'middle',
+        fill: '#fff', 'font-size': node.fontSize, 'font-weight': node.weight,
+        'font-family': 'system-ui, -apple-system, sans-serif',
+      });
+      const firstLineY = node.cy - (node.lines.length - 1) / 2 * node.lineHeight;
+      node.lines.forEach((line, i) => {
+        const tspan = document.createElementNS(SVG_NS, 'tspan');
+        tspan.setAttribute('x', node.cx);
+        tspan.setAttribute('y', firstLineY + i * node.lineHeight);
+        tspan.setAttribute('dominant-baseline', 'central');
+        tspan.textContent = line || ' ';
+        text.appendChild(tspan);
+      });
+      ghostG.appendChild(text);
+      canvasG.appendChild(ghostG);
+      ghostG._anchor = { x: node.left + node.boxW / 2, y: node.cy };
+    }
+    function updateDragGhost(cx, cy) {
+      if (!ghostG) return;
+      const w = clientToWorld(cx, cy);
+      const a = ghostG._anchor;
+      ghostG.setAttribute('transform', `translate(${w.x - a.x}, ${w.y - a.y})`);
+    }
+
+    // ── ホイールズーム ──────────────────────────────────
+    function onWheel(e) {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.12 : 1 / 1.12;
+      zoomAt(e.clientX, e.clientY, factor);
+    }
+    function zoomAt(cx, cy, factor) {
+      const p = svgPointFromClient(cx, cy);
+      const wx = (p.x - view.tx) / view.scale;
+      const wy = (p.y - view.ty) / view.scale;
+      const newScale = Math.max(0.15, Math.min(4, view.scale * factor));
+      view.tx = p.x - wx * newScale;
+      view.ty = p.y - wy * newScale;
+      view.scale = newScale;
+      applyTransform();
+    }
+    function zoomCentered(factor) {
+      const r = svg.getBoundingClientRect();
+      zoomAt(r.left + r.width / 2, r.top + r.height / 2, factor);
+    }
+
+    svg.addEventListener('pointerdown', onPointerDown);
+    svg.addEventListener('pointermove', onPointerMove);
+    svg.addEventListener('pointerup', onPointerUp);
+    svg.addEventListener('pointercancel', onPointerUp);
+    svg.addEventListener('lostpointercapture', onPointerUp);
+    svg.addEventListener('wheel', onWheel, { passive: false });
+    // タッチデバイスの二本指ジェスチャは pointerEvent でカバーされる
+    svg.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // ════════════════════════════════════════════════════
+    // 13. テキスト入力支援
+    // ════════════════════════════════════════════════════
+    function getLineRange(text, pos) {
+      const start = text.lastIndexOf('\n', pos - 1) + 1;
+      let end = text.indexOf('\n', pos);
+      if (end === -1) end = text.length;
+      return { start, end };
+    }
+
+    function applyEditorChange(beforeSlice, replacement, afterSlice, caret) {
+      editor.value = beforeSlice + replacement + afterSlice;
+      editor.selectionStart = editor.selectionEnd = caret;
+      scheduleRender();
+    }
+
+    function handleEnterKey(e) {
+      const pos = editor.selectionStart;
+      if (pos !== editor.selectionEnd) return false;
+      const v = editor.value;
+      const { start } = getLineRange(v, pos);
+      const lineUpToCaret = v.slice(start, pos);
+      const m = lineUpToCaret.match(/^(\s*)([-*+])\s+(.*)$/);
+      if (!m) return false;
+      const [, indent, bullet, content] = m;
+
+      e.preventDefault();
+      if (content.trim() === '') {
+        // 空行 → アウトデント または リスト終了
+        if (indent.length >= 2) {
+          const newIndent = indent.slice(0, -2);
+          const newLine = `${newIndent}${bullet} `;
+          // 現在行を置き換え
+          editor.value = v.slice(0, start) + newLine + v.slice(pos);
+          editor.selectionStart = editor.selectionEnd = start + newLine.length;
+        } else {
+          // リスト終了 → 空行
+          editor.value = v.slice(0, start) + '\n' + v.slice(pos);
+          editor.selectionStart = editor.selectionEnd = start + 1;
+        }
+      } else {
+        // 同じインデントで新しい箇条書き
+        const insert = `\n${indent}${bullet} `;
+        editor.value = v.slice(0, pos) + insert + v.slice(pos);
+        editor.selectionStart = editor.selectionEnd = pos + insert.length;
+      }
+      scheduleRender();
+      return true;
+    }
+
+    function handleIndent(direction) {
+      const v = editor.value;
+      const selStart = editor.selectionStart, selEnd = editor.selectionEnd;
+      // 選択範囲（または現在行）の行範囲
+      const rangeStart = v.lastIndexOf('\n', selStart - 1) + 1;
+      const rangeEndN = v.indexOf('\n', selEnd);
+      const rangeEnd = rangeEndN === -1 ? v.length : rangeEndN;
+      const block = v.slice(rangeStart, rangeEnd);
+      const lines = block.split('\n');
+
+      let delta = 0;
+      const transformed = lines.map(line => {
+        if (direction > 0) {
+          delta += 2;
+          return '  ' + line;
+        } else {
+          if (line.startsWith('  ')) { delta -= 2; return line.slice(2); }
+          if (line.startsWith('\t'))  { delta -= 1; return line.slice(1); }
+          return line;
+        }
+      }).join('\n');
+
+      editor.value = v.slice(0, rangeStart) + transformed + v.slice(rangeEnd);
+      // 選択範囲の維持（おおまかに）
+      const indentEach = direction > 0 ? 2 : -2;
+      const lineCount = lines.length;
+      editor.selectionStart = Math.max(rangeStart, selStart + indentEach);
+      editor.selectionEnd = Math.max(rangeStart, selEnd + indentEach * lineCount);
+      scheduleRender();
+    }
+
+    function handleNewBullet(asChild = false) {
+      const v = editor.value;
+      const pos = editor.selectionStart;
+      const { start, end } = getLineRange(v, pos);
+      const line = v.slice(start, end);
+      const m = line.match(/^(\s*)([-*+])\s+/);
+      const indent = m ? m[1] : '';
+      const bullet = m ? m[2] : '-';
+      const newIndent = asChild ? indent + '  ' : indent;
+      // 行末に挿入
+      const insert = (end > start ? '\n' : '') + `${newIndent}${bullet} `;
+      editor.value = v.slice(0, end) + insert + v.slice(end);
+      const caret = end + insert.length;
+      editor.selectionStart = editor.selectionEnd = caret;
+      editor.focus();
+      scheduleRender();
+    }
+
+    editor.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        if (handleEnterKey(e)) return;
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        handleIndent(e.shiftKey ? -1 : 1);
+      }
+    });
+
+    document.querySelector('.editor-toolbar').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]'); if (!btn) return;
+      const action = btn.getAttribute('data-action');
+      editor.focus();
+      if (action === 'indent') handleIndent(1);
+      else if (action === 'outdent') handleIndent(-1);
+      else if (action === 'newbullet') handleNewBullet(false);
+      else if (action === 'newchild') handleNewBullet(true);
+    });
+
+    let renderTimer = null;
+    function scheduleRender() {
+      clearTimeout(renderTimer);
+      renderTimer = setTimeout(() => { render(); saveLocal(); }, 80);
+    }
+
+    editor.addEventListener('input', scheduleRender);
+
+    // ════════════════════════════════════════════════════
+    // 14. 共有・保存・読み込み
+    // ════════════════════════════════════════════════════
+    function copyShareUrl() {
+      const md = editor.value;
+      const compressed = LZString.compressToEncodedURIComponent(md);
+      const url = `${location.origin}${location.pathname}#${compressed}`;
+      const sizeKb = Math.round(compressed.length / 1024 * 10) / 10;
+      const fallback = () => prompt('このURLをコピーしてください', url);
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(url).then(
+          () => toast(`共有URLをコピーしました（${sizeKb}KB）`),
+          fallback
+        );
+      } else fallback();
+    }
+    function loadFromHash() {
+      if (location.hash.length > 1) {
+        const md = LZString.decompressFromEncodedURIComponent(location.hash.slice(1));
+        if (md && md.length > 0) return md;
+      }
+      return null;
+    }
+    function downloadMarkdown() {
+      const md = editor.value;
+      const title = (tree?.text || 'mindmap').replace(/[\s\/\\:*?"<>|]+/g, '_').slice(0, 40);
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${title || 'mindmap'}.md`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      toast(`${a.download} を保存しました`);
+    }
+
+    document.getElementById('btn-upload').addEventListener('click', () =>
+      document.getElementById('file-input').click());
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = () => {
+        editor.value = r.result;
+        saveLocal();
+        render({ fit: true });
+        toast(`${f.name} を読み込みました`);
+      };
+      r.readAsText(f);
+      e.target.value = '';
+    });
+    document.getElementById('btn-share').addEventListener('click', copyShareUrl);
+    document.getElementById('btn-download').addEventListener('click', downloadMarkdown);
+
+    document.getElementById('btn-zoom-in').addEventListener('click', () => zoomCentered(1.2));
+    document.getElementById('btn-zoom-out').addEventListener('click', () => zoomCentered(1 / 1.2));
+    document.getElementById('btn-zoom-fit').addEventListener('click', () => { fitContent(); toast('全体を表示'); });
+
+    // ════════════════════════════════════════════════════
+    // 15. localStorage 保存
+    // ════════════════════════════════════════════════════
+    const LS_KEY = 'mindmap.draft.v1';
+    function saveLocal() {
+      try { localStorage.setItem(LS_KEY, editor.value); } catch {}
+    }
+
+    // ════════════════════════════════════════════════════
+    // 16. トースト
+    // ════════════════════════════════════════════════════
+    let toastTimer = null;
+    function toast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.background = isError ? '#dc2626' : '#1e293b';
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    // ════════════════════════════════════════════════════
+    // 17. モバイル表示切替
+    // ════════════════════════════════════════════════════
+    document.getElementById('btn-toggle').addEventListener('click', () => {
+      if (main.classList.contains('view-editor')) {
+        main.classList.remove('view-editor'); main.classList.add('view-mindmap');
+        requestAnimationFrame(() => fitContent());
+      } else if (main.classList.contains('view-mindmap')) {
+        main.classList.remove('view-mindmap'); main.classList.add('view-split');
+        requestAnimationFrame(() => fitContent());
+      } else {
+        main.classList.remove('view-split'); main.classList.add('view-editor');
+      }
+    });
+
+    // ────────── 起動とリサイズ ──────────
+    window.addEventListener('resize', () => { resizeViewport(); applyTransform(); });
+    window.addEventListener('hashchange', () => {
+      const fromHash = loadFromHash();
+      if (fromHash) { editor.value = fromHash; render({ fit: true }); }
+    });
+
+    (function boot() {
+      const fromHash = loadFromHash();
+      if (fromHash) editor.value = fromHash;
+      else editor.value = localStorage.getItem(LS_KEY) || SAMPLE;
+      // 初期レンダリング後、レイアウト確定後にフィット
+      requestAnimationFrame(() => {
+        render();
+        requestAnimationFrame(() => fitContent());
+      });
+    })();
+  </script>
+</body>
+</html>
