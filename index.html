@@ -13,10 +13,20 @@
       --bg: #f8fafc;
       --surface: #ffffff;
       --border: #e2e8f0;
+      --border-strong: #cbd5e1;
       --text: #0f172a;
+      --text-soft: #334155;
       --muted: #64748b;
+      --muted-soft: #94a3b8;
       --accent: #0284c7;
-      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --accent-soft: #e0f2fe;
+      --accent-strong: #0369a1;
+      --danger: #dc2626;
+      --danger-soft: #fef2f2;
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.1);
+      --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.15);
       --c0: #1e293b;
       --c1: #0284c7;
       --c2: #059669;
@@ -24,79 +34,313 @@
       --c4: #db2777;
       --c5: #7c3aed;
       --c6: #64748b;
+      --r-sm: 6px;
+      --r-md: 10px;
+      --r-lg: 14px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
       margin: 0; padding: 0; height: 100%;
       background: var(--bg); color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
       overscroll-behavior: none;
+      font-size: 14px;
     }
     body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
 
-    /* ── ヘッダー ────────────────────────────────────────── */
+    button {
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      padding: 8px 12px; border: 1px solid var(--border); background: var(--surface);
+      color: var(--text); border-radius: var(--r-md); cursor: pointer;
+      transition: background-color .15s ease, border-color .15s ease, transform .05s ease, color .15s ease;
+      display: inline-flex; align-items: center; gap: 6px;
+      min-height: 36px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    button:hover { background: #f1f5f9; border-color: var(--border-strong); }
+    button:active { transform: translateY(1px); }
+    button.primary { background: var(--c1); color: #fff; border-color: var(--c1); }
+    button.primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+    button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
+    button.ghost:hover { background: #f1f5f9; color: var(--text); }
+    button.danger { color: var(--danger); border-color: transparent; background: transparent; }
+    button.danger:hover { background: var(--danger-soft); }
+    button.icon-only { padding: 0; width: 36px; height: 36px; justify-content: center; }
+    button.icon-only .label { display: none; }
+    button .icon { font-size: 14px; line-height: 1; }
+    button.block { width: 100%; justify-content: center; }
+
+    /* ─────────────────────────────────────────
+       ヘッダー
+       ───────────────────────────────────────── */
     header {
       display: flex; align-items: center; gap: 8px;
       padding: 8px 14px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+      flex-wrap: nowrap;
       z-index: 10;
+      min-height: 56px;
     }
     header .title-wrap {
       display: flex; align-items: center; gap: 10px;
-      flex: 1 1 220px; min-width: 0;
+      flex: 1 1 auto; min-width: 0;
     }
     header .logo {
       width: 36px; height: 36px; border-radius: 9px;
       background: linear-gradient(135deg, var(--c0), var(--c1));
       display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 16px;
       flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
     }
-    .map-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+    .map-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; flex: 1; }
+    .map-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
     .map-title {
       font-size: 15px; font-weight: 700; color: var(--text);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      cursor: pointer; padding: 2px 6px; margin: -2px -6px;
-      border-radius: 6px; transition: background-color .15s;
+      cursor: pointer; padding: 3px 8px; margin: -3px -8px;
+      border-radius: var(--r-sm); transition: background-color .15s;
+      min-width: 0; max-width: 100%;
     }
     .map-title:hover { background: #f1f5f9; }
+    .save-indicator {
+      font-size: 11px; color: var(--muted); display: inline-flex; align-items: center; gap: 3px;
+      flex-shrink: 0;
+      opacity: 0; transition: opacity .2s ease;
+    }
+    .save-indicator.show { opacity: 1; }
+    .save-indicator .dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--c2);
+      animation: pulse 1.5s infinite ease-in-out;
+    }
+    .save-indicator.saved .dot { animation: none; background: var(--c2); }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
     .map-sub {
       font-size: 11px; color: var(--muted); font-weight: 500;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      padding: 0 6px;
+      padding: 0 8px;
     }
     .map-sub span { color: var(--c4); }
+    .header-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
 
-    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    button {
-      font-family: inherit; font-size: 13px; font-weight: 600;
-      padding: 8px 12px; border: 1px solid var(--border); background: var(--surface);
-      color: var(--text); border-radius: 8px; cursor: pointer;
-      transition: background-color .15s ease, border-color .15s ease, transform .05s ease;
-      display: inline-flex; align-items: center; gap: 4px;
-      min-height: 36px;
-      user-select: none;
+    /* ─────────────────────────────────────────
+       メイン
+       ───────────────────────────────────────── */
+    main {
+      flex: 1; display: flex; min-height: 0; position: relative;
+      overflow: hidden;
     }
-    button:hover { background: #f1f5f9; border-color: #cbd5e1; }
-    button:active { transform: translateY(1px); }
-    button.primary { background: var(--c1); color: #fff; border-color: var(--c1); }
-    button.primary:hover { background: #0369a1; }
-    button.ghost { background: transparent; border-color: transparent; color: var(--muted); }
-    button.danger { color: #b91c1c; }
-    button.danger:hover { background: #fef2f2; border-color: #fecaca; }
-    button .icon { font-size: 14px; }
 
-    /* ── メイン ────────────────────────────────────────── */
-    main { flex: 1; display: flex; min-height: 0; position: relative; }
+    /* ─────────────────────────────────────────
+       サイドバー
+       ───────────────────────────────────────── */
+    .sidebar {
+      width: 300px; flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      transition: margin-left 280ms var(--ease);
+      z-index: 20;
+      min-height: 0;
+    }
+    body.sidebar-hidden .sidebar { margin-left: -300px; }
+
+    .sb-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 14px 8px;
+    }
+    .sb-header-left { display: flex; align-items: baseline; gap: 8px; }
+    .sb-header h2 { font-size: 14px; font-weight: 700; margin: 0; color: var(--text); }
+    .sb-count {
+      font-size: 11px; color: var(--muted); background: var(--bg);
+      padding: 2px 8px; border-radius: 999px; font-weight: 600;
+    }
+
+    .sb-tools {
+      padding: 4px 14px 10px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .sb-search-wrap { position: relative; }
+    .sb-search {
+      width: 100%; padding: 8px 10px 8px 32px;
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      font-family: inherit; font-size: 13px;
+      background: var(--bg); color: var(--text);
+      outline: none;
+      transition: border-color .15s, background .15s;
+    }
+    .sb-search:focus { border-color: var(--c1); background: var(--surface); }
+    .sb-search-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      font-size: 13px; color: var(--muted-soft); pointer-events: none;
+    }
+    .sb-sort {
+      width: 100%;
+      padding: 7px 10px;
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      background: var(--surface); color: var(--text);
+      cursor: pointer; outline: none;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+      padding-right: 28px;
+    }
+
+    .sb-new-wrap { padding: 0 14px 10px; }
+    .sb-new-btn {
+      width: 100%; justify-content: center;
+      background: var(--c1); color: #fff; border-color: var(--c1);
+      font-weight: 700; font-size: 13px;
+      min-height: 40px;
+      box-shadow: 0 1px 2px rgba(2,132,199,0.25);
+    }
+    .sb-new-btn:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+
+    .sb-list {
+      flex: 1; overflow-y: auto; min-height: 0;
+      padding: 4px 8px 14px;
+      display: flex; flex-direction: column; gap: 2px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+    .sb-list::-webkit-scrollbar { width: 6px; }
+    .sb-list::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+    .sb-empty {
+      text-align: center; color: var(--muted); padding: 28px 14px; font-size: 13px;
+      line-height: 1.6;
+    }
+    .sb-empty .icon { font-size: 32px; display: block; margin-bottom: 8px; opacity: 0.5; }
+
+    .map-item {
+      position: relative;
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 10px 36px 10px 14px;
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: var(--r-md);
+      cursor: pointer;
+      transition: background-color .12s ease, border-color .12s ease, transform .05s ease;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .map-item:hover { background: var(--bg); }
+    .map-item:active { transform: scale(0.99); }
+    .map-item.active {
+      background: var(--accent-soft);
+      border-color: #93c5fd;
+    }
+    .map-item.active::before {
+      content: '';
+      position: absolute;
+      left: -3px; top: 8px; bottom: 8px;
+      width: 3px; border-radius: 0 3px 3px 0;
+      background: var(--c1);
+    }
+    .map-item-title {
+      font-size: 13px; font-weight: 600; line-height: 1.4;
+      color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .map-item.active .map-item-title { color: #0c4a6e; font-weight: 700; }
+    .map-item-meta {
+      font-size: 11px; color: var(--muted);
+      display: flex; gap: 4px; align-items: center;
+      white-space: nowrap;
+    }
+    .map-item-meta .sep { opacity: 0.5; }
+    .map-item.active .map-item-meta { color: #0369a1; }
+
+    .map-item-menu-btn {
+      position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+      width: 26px; height: 26px; padding: 0;
+      border: none; background: transparent; cursor: pointer;
+      border-radius: var(--r-sm);
+      font-size: 16px; line-height: 1; color: var(--muted-soft);
+      opacity: 0; transition: opacity .12s ease, background-color .12s ease, color .12s ease;
+      display: grid; place-items: center;
+      min-height: auto;
+    }
+    .map-item:hover .map-item-menu-btn,
+    .map-item.active .map-item-menu-btn { opacity: 1; }
+    .map-item-menu-btn:hover { background: rgba(15,23,42,0.08); color: var(--text); }
+    @media (hover: none) {
+      .map-item-menu-btn { opacity: 0.8; }
+    }
+
+    .sb-footer {
+      padding: 8px 10px 12px;
+      border-top: 1px solid var(--border);
+      display: flex; gap: 4px;
+      background: linear-gradient(180deg, transparent, rgba(248,250,252,0.5));
+    }
+    .sb-footer button { flex: 1; font-size: 11px; min-height: 34px; padding: 6px 8px; font-weight: 600; }
+
+    /* コンテキストメニュー */
+    .ctx-menu {
+      position: fixed;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-lg);
+      padding: 4px;
+      z-index: 300;
+      min-width: 180px;
+      opacity: 0; transform: scale(0.96) translateY(-4px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .12s var(--ease);
+    }
+    .ctx-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+    .ctx-menu button {
+      width: 100%; justify-content: flex-start;
+      background: transparent; border: none;
+      padding: 8px 12px; min-height: 36px;
+      font-size: 13px; font-weight: 500; color: var(--text);
+      border-radius: var(--r-sm);
+    }
+    .ctx-menu button:hover { background: var(--bg); }
+    .ctx-menu button.danger { color: var(--danger); }
+    .ctx-menu button.danger:hover { background: var(--danger-soft); }
+    .ctx-menu hr {
+      border: none; border-top: 1px solid var(--border);
+      margin: 4px 0;
+    }
+
+    /* バックドロップ（モバイルのみ） */
+    .sb-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(15, 23, 42, 0.4);
+      z-index: 15;
+      opacity: 0; pointer-events: none;
+      transition: opacity 240ms ease;
+      backdrop-filter: blur(2px);
+    }
+
+    /* ─────────────────────────────────────────
+       エディタ
+       ───────────────────────────────────────── */
     #editor-pane {
-      width: 42%; min-width: 280px;
+      width: 38%; min-width: 280px;
       display: flex; flex-direction: column;
       border-right: 1px solid var(--border);
       background: var(--surface);
+      min-height: 0;
     }
-    #editor-pane .editor-header {
+    .editor-header {
       padding: 8px 14px; font-size: 12px; color: var(--muted); font-weight: 600;
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
@@ -120,6 +364,9 @@
     }
     #editor:focus { background: #fefefe; }
 
+    /* ─────────────────────────────────────────
+       ビュー
+       ───────────────────────────────────────── */
     #view-pane {
       flex: 1; min-width: 0; position: relative; overflow: hidden;
       background: radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0);
@@ -147,20 +394,18 @@
     @media (hover: none) { #mindmap .add-btn { opacity: 1; } }
     #mindmap .drag-ghost { pointer-events: none; }
 
-    /* ── ズーム ─────────────────────────────────────────── */
     .zoom-pill {
       position: absolute; right: 12px; bottom: 12px;
       background: rgba(255,255,255,.96); backdrop-filter: blur(10px);
       border: 1px solid var(--border); border-radius: 12px;
       padding: 6px;
       display: flex; gap: 4px; align-items: center;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, .1); z-index: 5;
+      box-shadow: var(--shadow-md); z-index: 5;
     }
     .zoom-pill button { min-height: 36px; min-width: 36px; padding: 0 8px; border-color: transparent; background: transparent; }
     .zoom-pill button:hover { background: #f1f5f9; }
     .zoom-pill .zoom-level { min-width: 48px; text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; user-select: none; }
 
-    /* ── ステータスバー ──────────────────────────────────── */
     .status-bar {
       position: absolute; left: 12px; bottom: 12px;
       background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
@@ -168,40 +413,62 @@
       padding: 6px 10px;
       font-size: 12px; color: var(--muted);
       display: flex; gap: 10px; align-items: center;
-      box-shadow: var(--shadow); z-index: 5;
+      box-shadow: var(--shadow-sm); z-index: 5;
     }
     .status-bar .legend { display: flex; gap: 6px; align-items: center; }
     .status-bar .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 
-    /* ── トースト ────────────────────────────────────────── */
+    /* ─────────────────────────────────────────
+       トースト
+       ───────────────────────────────────────── */
     .toast {
       position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%) translateY(20px);
       background: var(--c0); color: #fff; padding: 10px 18px;
       border-radius: 999px; font-size: 13px; font-weight: 600;
       opacity: 0; pointer-events: none;
-      transition: opacity .25s ease, transform .25s ease;
-      z-index: 200;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, .25);
+      transition: opacity .25s ease, transform .25s var(--ease);
+      z-index: 400;
+      box-shadow: var(--shadow-lg);
       max-width: 92vw; text-align: center;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* ── モバイル ────────────────────────────────────────── */
-    .mobile-toggle { display: none; }
+    /* ─────────────────────────────────────────
+       モバイル
+       ───────────────────────────────────────── */
+    .mobile-only { display: none !important; }
+
     @media (max-width: 768px) {
-      header { padding: 6px 10px; gap: 6px; }
+      header { padding: 6px 10px; gap: 6px; min-height: 52px; }
       header .logo { width: 32px; height: 32px; font-size: 14px; }
       .map-title { font-size: 14px; }
       .map-sub { font-size: 10px; }
       button { padding: 7px 10px; font-size: 12px; min-height: 36px; }
       main { flex-direction: column; }
+
+      /* サイドバー：モバイルではドロワー */
+      .sidebar {
+        position: fixed;
+        top: 0; bottom: 0; left: 0;
+        width: 84vw; max-width: 360px;
+        margin-left: -100%;
+        box-shadow: 4px 0 30px rgba(15, 23, 42, 0.2);
+        z-index: 100;
+      }
+      body.sidebar-hidden .sidebar { margin-left: -100%; }
+      body.sidebar-shown .sidebar { margin-left: 0; }
+      .sb-backdrop { display: block; }
+      body.sidebar-shown .sb-backdrop { opacity: 1; pointer-events: auto; }
+
+      .mobile-only { display: inline-flex !important; }
+      .desktop-only { display: none !important; }
+
       #editor-pane { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
       main.view-mindmap #editor-pane { display: none; }
       main.view-editor #view-pane { display: none; }
       main.view-split #editor-pane { height: 45%; }
       main.view-split #view-pane { height: 55%; }
-      .mobile-toggle { display: inline-flex; }
-      .desktop-only { display: none !important; }
+
       #editor { font-size: 17px; line-height: 1.9; padding: 16px 14px; }
       .editor-toolbar button { min-height: 44px; padding: 0 14px; font-size: 14px; }
       .editor-toolbar .hint { display: none; }
@@ -209,12 +476,19 @@
       .status-bar .legend-text { display: none; }
       .zoom-pill { right: 8px; bottom: 8px; }
       .zoom-pill button { min-height: 44px; min-width: 44px; }
+
+      .map-item { padding: 12px 36px 12px 14px; }
+      .map-item-title { font-size: 14px; }
+      .map-item-meta { font-size: 11px; }
+      .map-item-menu-btn { width: 32px; height: 32px; font-size: 18px; }
     }
 
-    /* ── ダイアログ共通 ───────────────────────────────────── */
+    /* ─────────────────────────────────────────
+       ダイアログ
+       ───────────────────────────────────────── */
     dialog {
-      border: none; border-radius: 16px; padding: 0;
-      box-shadow: 0 20px 60px rgba(15, 23, 42, .25);
+      border: none; border-radius: var(--r-lg); padding: 0;
+      box-shadow: var(--shadow-lg);
       max-width: 92vw;
     }
     dialog::backdrop { background: rgba(15, 23, 42, .4); backdrop-filter: blur(4px); }
@@ -223,11 +497,10 @@
     dialog .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
     dialog .dialog-actions button { min-height: 40px; padding: 0 16px; }
 
-    /* 編集ダイアログ */
     #dialog-edit { width: 460px; }
     #dialog-edit .dialog-input {
       width: 100%; padding: 12px 14px;
-      border: 1px solid var(--border); border-radius: 10px;
+      border: 1px solid var(--border); border-radius: var(--r-md);
       font-size: 16px; font-family: inherit; line-height: 1.6;
       margin-bottom: 8px;
       resize: vertical; min-height: 56px; max-height: 50vh;
@@ -239,88 +512,38 @@
     }
     .dialog-hint kbd {
       font-family: ui-monospace, Menlo, monospace; font-size: 10px;
-      background: #f1f5f9; border: 1px solid var(--border);
+      background: var(--bg); border: 1px solid var(--border);
       padding: 1px 6px; border-radius: 4px; color: var(--text);
     }
 
-    /* ライブラリダイアログ */
-    #dialog-library {
-      width: 680px; max-width: 96vw;
-      max-height: 86vh;
-      display: flex; flex-direction: column;
-    }
-    #dialog-library .library-body { display: flex; flex-direction: column; min-height: 0; }
-    #dialog-library .library-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 18px 22px; border-bottom: 1px solid var(--border);
-    }
-    #dialog-library .library-header h2 { margin: 0; font-size: 17px; }
-    #dialog-library .library-actions {
-      padding: 14px 22px; border-bottom: 1px solid var(--border);
-      display: flex; gap: 8px; flex-wrap: wrap; background: #f8fafc;
-    }
-    #dialog-library .library-actions .filler { flex: 1; min-width: 8px; }
-    #dialog-library .library-list {
-      overflow-y: auto; padding: 14px 22px 20px;
-      display: flex; flex-direction: column; gap: 10px;
-      flex: 1; min-height: 0;
-    }
-    #dialog-library .empty {
-      text-align: center; color: var(--muted); padding: 32px 12px; font-size: 13px;
-    }
-
-    .map-card {
-      padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px;
-      background: var(--surface);
-      transition: border-color .15s, box-shadow .15s;
-    }
-    .map-card:hover { border-color: #cbd5e1; box-shadow: var(--shadow); }
-    .map-card.current { border-color: var(--c1); background: #f0f9ff; }
-    .map-card .card-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
-    .map-card .badge {
-      font-size: 10px; font-weight: 700; color: #fff; background: var(--c1);
-      padding: 2px 8px; border-radius: 999px; flex-shrink: 0;
-    }
-    .map-card .card-title {
-      font-size: 15px; font-weight: 700; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      flex: 1; min-width: 0;
-    }
-    .map-card .card-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
-    .map-card .card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
-    .map-card .card-actions button { font-size: 12px; padding: 6px 10px; min-height: 32px; }
-
-    @media (max-width: 768px) {
-      #dialog-library { width: 100%; max-width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; }
-      #dialog-library .library-actions { padding: 10px 14px; }
-      #dialog-library .library-list { padding: 10px 14px 16px; }
-      .map-card .card-actions button { font-size: 13px; padding: 8px 12px; min-height: 38px; }
-    }
-
-    /* 確認ダイアログ */
     #dialog-confirm { width: 380px; }
     #dialog-confirm .confirm-msg { font-size: 14px; line-height: 1.6; margin-bottom: 18px; color: var(--text); }
   </style>
 </head>
-<body>
+<body class="sidebar-hidden">
 
   <header>
+    <button id="btn-sidebar" class="ghost icon-only" title="マップ一覧を開閉">
+      <span class="icon">📚</span><span class="label">マップ</span>
+    </button>
     <div class="title-wrap">
       <div class="logo">M</div>
       <div class="map-meta">
-        <div class="map-title" id="map-title" title="クリックでタイトルを編集">マップ</div>
+        <div class="map-title-row">
+          <div class="map-title" id="map-title" title="クリックでタイトルを編集">マップ</div>
+          <div class="save-indicator" id="save-indicator">
+            <span class="dot"></span><span class="save-text">保存中</span>
+          </div>
+        </div>
         <div class="map-sub">MindMap <span>—</span> 初期値は、愛</div>
       </div>
     </div>
-    <div class="btn-group">
-      <button id="btn-toggle" class="mobile-toggle ghost" title="表示切替">
-        <span class="icon">⇄</span><span>表示</span>
+    <div class="header-actions">
+      <button id="btn-toggle" class="mobile-only ghost icon-only" title="表示切替">
+        <span class="icon">⇄</span>
       </button>
-      <button id="btn-new" title="新規マップを作成">
-        <span class="icon">＋</span><span>新規</span>
-      </button>
-      <button id="btn-library" title="マップライブラリを開く">
-        <span class="icon">📚</span><span>一覧</span>
+      <button id="btn-new" title="新規マップを作成" class="ghost icon-only">
+        <span class="icon">＋</span>
       </button>
       <button id="btn-share" class="primary" title="共有URLをコピー">
         <span class="icon">🔗</span><span>共有</span>
@@ -329,6 +552,42 @@
   </header>
 
   <main class="view-split">
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="sb-header-left">
+          <h2>📚 マップ</h2>
+          <span class="sb-count" id="sb-count">0</span>
+        </div>
+        <button id="sb-close" class="ghost icon-only mobile-only" title="閉じる">
+          <span class="icon">×</span>
+        </button>
+      </div>
+      <div class="sb-tools">
+        <div class="sb-search-wrap">
+          <span class="sb-search-icon">🔍</span>
+          <input type="search" id="sb-search" class="sb-search" placeholder="マップを検索..." autocomplete="off">
+        </div>
+        <select id="sb-sort" class="sb-sort">
+          <option value="updated">最終更新順</option>
+          <option value="created">作成順（新しい順）</option>
+          <option value="title">タイトル順（あいうえお）</option>
+        </select>
+      </div>
+      <div class="sb-new-wrap">
+        <button id="sb-new" class="sb-new-btn">
+          <span class="icon">＋</span><span>新規マップ</span>
+        </button>
+      </div>
+      <div class="sb-list" id="sb-list"></div>
+      <div class="sb-footer">
+        <button id="sb-import" class="ghost"><span>📥</span><span>取り込み</span></button>
+        <button id="sb-export-all" class="ghost"><span>📁</span><span>一括保存</span></button>
+      </div>
+    </aside>
+
+    <div class="sb-backdrop" id="sb-backdrop"></div>
+
     <section id="editor-pane">
       <div class="editor-header">
         <span>📝 Markdownエディタ</span>
@@ -372,9 +631,13 @@
     </section>
   </main>
 
-  <input type="file" id="file-input" accept=".md,.markdown,.txt" hidden />
+  <input type="file" id="file-input" accept=".md,.markdown,.txt" hidden multiple />
   <div id="toast" class="toast"></div>
 
+  <!-- コンテキストメニュー -->
+  <div class="ctx-menu" id="ctx-menu" role="menu"></div>
+
+  <!-- 編集ダイアログ -->
   <dialog id="dialog-edit">
     <div class="dialog-body">
       <h2 id="dialog-title">ノードを編集</h2>
@@ -390,30 +653,14 @@
     </div>
   </dialog>
 
-  <dialog id="dialog-library">
-    <div class="library-body">
-      <div class="library-header">
-        <h2>📚 マップライブラリ</h2>
-        <button id="lib-close" class="ghost">×</button>
-      </div>
-      <div class="library-actions">
-        <button id="lib-new" class="primary"><span class="icon">＋</span><span>新規マップ</span></button>
-        <button id="lib-import" title=".mdファイルから取り込む"><span class="icon">📥</span><span>取り込み</span></button>
-        <button id="lib-export-all" title="全マップを任意のフォルダに保存"><span class="icon">📁</span><span>フォルダに一括保存</span></button>
-        <span class="filler"></span>
-        <span id="lib-fs-note" style="font-size:11px;color:var(--muted);align-self:center;"></span>
-      </div>
-      <div class="library-list" id="library-list"></div>
-    </div>
-  </dialog>
-
+  <!-- 確認ダイアログ -->
   <dialog id="dialog-confirm">
     <div class="dialog-body">
       <h2 id="confirm-title">確認</h2>
       <div class="confirm-msg" id="confirm-msg"></div>
       <div class="dialog-actions">
         <button id="confirm-cancel">キャンセル</button>
-        <button id="confirm-ok" class="primary danger">削除する</button>
+        <button id="confirm-ok" class="primary">OK</button>
       </div>
     </div>
   </dialog>
@@ -429,7 +676,7 @@
     const colorFor = d => COLORS[Math.min(d, COLORS.length - 1)];
 
     // ════════════════════════════════════════════════════
-    // 2. 初期サンプル
+    // 2. サンプル
     // ════════════════════════════════════════════════════
     const SAMPLE = `# 想夫恋 宇美店
 
@@ -463,6 +710,13 @@
     const svg = document.getElementById('mindmap');
     const main = document.querySelector('main');
     const mapTitleEl = document.getElementById('map-title');
+    const saveIndicator = document.getElementById('save-indicator');
+    const saveText = saveIndicator.querySelector('.save-text');
+    const sbList = document.getElementById('sb-list');
+    const sbSearch = document.getElementById('sb-search');
+    const sbSort = document.getElementById('sb-sort');
+    const sbCount = document.getElementById('sb-count');
+    const ctxMenu = document.getElementById('ctx-menu');
 
     // ════════════════════════════════════════════════════
     // 4. 状態
@@ -476,22 +730,23 @@
     let dragState = null;
     const pointers = new Map();
 
-    // ライブラリ
-    let library = null;     // { maps: [...], currentId: '...' }
-    let currentMap = null;  // 参照
-    let mutedSave = false;  // boot中はsave抑制
+    let library = null;
+    let currentMap = null;
+    let mutedSave = false;
+    let searchQuery = '';
+    let sortMode = 'updated';
 
     // ════════════════════════════════════════════════════
-    // 5. ライブラリ（localStorage）
+    // 5. ライブラリ
     // ════════════════════════════════════════════════════
     const LIB_KEY = 'mindmap.library.v2';
     const LEGACY_KEY = 'mindmap.draft.v1';
+    const PREFS_KEY = 'mindmap.prefs.v1';
 
     function freshId() {
       return 'm_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
     }
     function nowTs() { return Date.now(); }
-
     function titleOf(md) {
       const m = md.match(/^#\s+(.+?)\s*$/m);
       return m ? m[1].trim() : '無題のマップ';
@@ -502,26 +757,36 @@
     function escapeHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
-    function formatDate(ts) {
+    function relativeTime(ts) {
+      const diff = Date.now() - ts;
+      if (diff < 60_000) return 'たった今';
+      if (diff < 3600_000) return `${Math.floor(diff / 60_000)}分前`;
+      if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}時間前`;
+      if (diff < 7 * 86400_000) return `${Math.floor(diff / 86400_000)}日前`;
       const d = new Date(ts);
-      const pad = n => String(n).padStart(2, '0');
-      return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
     }
-
+    function loadPrefs() {
+      try {
+        const raw = localStorage.getItem(PREFS_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+      return {};
+    }
+    function savePrefs(p) {
+      try { localStorage.setItem(PREFS_KEY, JSON.stringify(p)); } catch {}
+    }
     function loadLibrary() {
-      // v2読み込み
       try {
         const raw = localStorage.getItem(LIB_KEY);
         if (raw) {
           const lib = JSON.parse(raw);
           if (lib && Array.isArray(lib.maps) && lib.maps.length > 0) {
-            // 整合性確認：currentIdが存在しないなら先頭に
             if (!lib.maps.find(m => m.id === lib.currentId)) lib.currentId = lib.maps[0].id;
             return lib;
           }
         }
       } catch {}
-      // v1からのマイグレーション
       const legacy = localStorage.getItem(LEGACY_KEY);
       if (legacy) {
         const m = { id: freshId(), markdown: legacy, createdAt: nowTs(), updatedAt: nowTs() };
@@ -529,13 +794,11 @@
         saveLibraryRaw(lib);
         return lib;
       }
-      // まっさら → サンプル1個
       const m = { id: freshId(), markdown: SAMPLE, createdAt: nowTs(), updatedAt: nowTs() };
       const lib = { maps: [m], currentId: m.id };
       saveLibraryRaw(lib);
       return lib;
     }
-
     function saveLibraryRaw(lib) {
       try { localStorage.setItem(LIB_KEY, JSON.stringify(lib)); } catch {}
     }
@@ -544,7 +807,7 @@
       saveLibraryRaw(library);
     }
 
-    function setCurrentMap(map) {
+    function setCurrentMap(map, opts = {}) {
       currentMap = map;
       library.currentId = map.id;
       mutedSave = true;
@@ -553,6 +816,16 @@
       saveLibrary();
       render({ fit: true });
       updateHeaderTitle();
+      renderSidebarList();
+      // モバイルでサイドバーを閉じる
+      if (window.innerWidth <= 768 && document.body.classList.contains('sidebar-shown')) {
+        if (!opts.keepSidebar) closeSidebar();
+      }
+      // アクティブカードを見える位置にスクロール
+      setTimeout(() => {
+        const active = sbList.querySelector('.map-item.active');
+        if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
     }
 
     function updateHeaderTitle() {
@@ -560,6 +833,19 @@
       const t = titleOf(currentMap.markdown);
       mapTitleEl.textContent = t;
       document.title = `${t} — MindMap`;
+    }
+
+    let saveStateTimer = null;
+    function showSaving() {
+      saveIndicator.classList.add('show');
+      saveIndicator.classList.remove('saved');
+      saveText.textContent = '保存中';
+    }
+    function showSaved() {
+      saveIndicator.classList.add('show', 'saved');
+      saveText.textContent = '保存しました';
+      clearTimeout(saveStateTimer);
+      saveStateTimer = setTimeout(() => saveIndicator.classList.remove('show'), 2000);
     }
 
     function flushCurrentMap() {
@@ -570,6 +856,8 @@
         currentMap.updatedAt = nowTs();
         saveLibrary();
         updateHeaderTitle();
+        renderSidebarList();
+        showSaved();
       }
     }
 
@@ -578,8 +866,10 @@
       const md = initialMd ?? BLANK_TEMPLATE;
       const m = { id: freshId(), markdown: md, createdAt: nowTs(), updatedAt: nowTs() };
       library.maps.unshift(m);
-      setCurrentMap(m);
+      setCurrentMap(m, opts);
       if (!opts.silent) toast('新しいマップを作成しました');
+      // エディタにフォーカス
+      setTimeout(() => { editor.focus(); editor.setSelectionRange(2, 2 + '新しいマップ'.length); }, 200);
     }
 
     function openMap(id) {
@@ -598,8 +888,40 @@
       const copy = { id: freshId(), markdown: newMd, createdAt: nowTs(), updatedAt: nowTs() };
       library.maps.unshift(copy);
       saveLibrary();
-      renderLibraryList();
+      renderSidebarList();
       toast('複製しました');
+    }
+
+    function renameMap(id) {
+      const m = library.maps.find(x => x.id === id);
+      if (!m) return;
+      const currentTitle = titleOf(m.markdown);
+      openDialog('マップ名を変更', currentTitle, (val) => {
+        if (val === null || val === '' || val === currentTitle) return;
+        // 最初の # 行を置き換え
+        const lines = m.markdown.split('\n');
+        let replaced = false;
+        for (let i = 0; i < lines.length; i++) {
+          if (/^#\s+\S/.test(lines[i])) {
+            lines[i] = `# ${val.split('\n')[0]}`;
+            replaced = true;
+            break;
+          }
+        }
+        if (!replaced) lines.unshift(`# ${val}`, '');
+        m.markdown = lines.join('\n');
+        m.updatedAt = nowTs();
+        if (m.id === library.currentId) {
+          mutedSave = true;
+          editor.value = m.markdown;
+          mutedSave = false;
+          render();
+          updateHeaderTitle();
+        }
+        saveLibrary();
+        renderSidebarList();
+        toast('名前を変更しました');
+      });
     }
 
     function deleteMapConfirmed(id) {
@@ -611,19 +933,233 @@
         const m = { id: freshId(), markdown: BLANK_TEMPLATE, createdAt: nowTs(), updatedAt: nowTs() };
         library.maps.push(m);
         library.currentId = m.id;
-        if (wasCurrent) setCurrentMap(m);
+        if (wasCurrent) setCurrentMap(m, { keepSidebar: true });
         else saveLibrary();
       } else if (wasCurrent) {
-        setCurrentMap(library.maps[0]);
+        setCurrentMap(library.maps[0], { keepSidebar: true });
       } else {
         saveLibrary();
       }
-      renderLibraryList();
+      renderSidebarList();
       toast('削除しました');
     }
 
     // ════════════════════════════════════════════════════
-    // 6. Markdownパーサ
+    // 6. サイドバー
+    // ════════════════════════════════════════════════════
+    function openSidebar() {
+      if (window.innerWidth <= 768) {
+        document.body.classList.remove('sidebar-hidden');
+        document.body.classList.add('sidebar-shown');
+      } else {
+        document.body.classList.remove('sidebar-hidden');
+      }
+      setTimeout(() => {
+        const active = sbList.querySelector('.map-item.active');
+        if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // PCではビューポートが変わったのでフィット
+        if (window.innerWidth > 768) requestAnimationFrame(() => { resizeViewport(); applyTransform(); });
+      }, 280);
+    }
+    function closeSidebar() {
+      if (window.innerWidth <= 768) {
+        document.body.classList.remove('sidebar-shown');
+      } else {
+        document.body.classList.add('sidebar-hidden');
+      }
+      setTimeout(() => {
+        if (window.innerWidth > 768) requestAnimationFrame(() => { resizeViewport(); applyTransform(); });
+      }, 280);
+    }
+    function toggleSidebar() {
+      const isMobile = window.innerWidth <= 768;
+      const isOpen = isMobile
+        ? document.body.classList.contains('sidebar-shown')
+        : !document.body.classList.contains('sidebar-hidden');
+      if (isOpen) closeSidebar(); else openSidebar();
+    }
+
+    function applySidebarInitial() {
+      // 初期：デスクトップ→表示、モバイル→非表示
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('sidebar-hidden');
+        document.body.classList.remove('sidebar-shown');
+      } else {
+        document.body.classList.remove('sidebar-hidden');
+        document.body.classList.remove('sidebar-shown');
+      }
+    }
+
+    function sortMaps(maps) {
+      const m = [...maps];
+      if (sortMode === 'updated') m.sort((a, b) => b.updatedAt - a.updatedAt);
+      else if (sortMode === 'created') m.sort((a, b) => b.createdAt - a.createdAt);
+      else if (sortMode === 'title') m.sort((a, b) => titleOf(a.markdown).localeCompare(titleOf(b.markdown), 'ja'));
+      return m;
+    }
+    function filterMaps(maps) {
+      if (!searchQuery.trim()) return maps;
+      const q = searchQuery.trim().toLowerCase();
+      return maps.filter(m =>
+        titleOf(m.markdown).toLowerCase().includes(q) ||
+        m.markdown.toLowerCase().includes(q)
+      );
+    }
+
+    function renderSidebarList() {
+      const all = library?.maps || [];
+      sbCount.textContent = all.length;
+      const filtered = filterMaps(all);
+      const sorted = sortMaps(filtered);
+
+      sbList.innerHTML = '';
+      if (sorted.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'sb-empty';
+        if (searchQuery.trim()) {
+          empty.innerHTML = `<span class="icon">🔍</span>「${escapeHtml(searchQuery)}」に一致するマップがありません<br><br><button id="sb-clear-search" class="ghost" style="font-size:12px;">検索をクリア</button>`;
+          setTimeout(() => {
+            document.getElementById('sb-clear-search')?.addEventListener('click', () => {
+              sbSearch.value = ''; searchQuery = ''; renderSidebarList();
+            });
+          }, 0);
+        } else {
+          empty.innerHTML = `<span class="icon">📭</span>まだマップがありません<br>「＋ 新規マップ」から始めてください`;
+        }
+        sbList.appendChild(empty);
+        return;
+      }
+
+      for (const m of sorted) {
+        const isActive = m.id === library.currentId;
+        const t = titleOf(m.markdown);
+        const nc = nodeCountOf(m.markdown);
+        const rt = relativeTime(m.updatedAt);
+
+        const item = document.createElement('div');
+        item.className = 'map-item' + (isActive ? ' active' : '');
+        item.setAttribute('data-id', m.id);
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.innerHTML = `
+          <div class="map-item-title">${escapeHtml(t)}</div>
+          <div class="map-item-meta">
+            <span>${escapeHtml(rt)}</span>
+            <span class="sep">·</span>
+            <span>${nc} ノード</span>
+          </div>
+          <button class="map-item-menu-btn" data-menu="${m.id}" aria-label="メニュー" title="メニュー">⋯</button>
+        `;
+        sbList.appendChild(item);
+      }
+    }
+
+    // クリック：開く / メニュー
+    sbList.addEventListener('click', (e) => {
+      const menuBtn = e.target.closest('.map-item-menu-btn');
+      if (menuBtn) {
+        e.stopPropagation();
+        const id = menuBtn.getAttribute('data-menu');
+        showContextMenu(menuBtn, id);
+        return;
+      }
+      const item = e.target.closest('.map-item');
+      if (item) {
+        const id = item.getAttribute('data-id');
+        if (id === library.currentId) {
+          // すでに開いてる→何もしない（だがモバイルではサイドバーを閉じる）
+          if (window.innerWidth <= 768) closeSidebar();
+          return;
+        }
+        openMap(id);
+      }
+    });
+
+    // キーボード
+    sbList.addEventListener('keydown', (e) => {
+      const item = e.target.closest('.map-item');
+      if (!item) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        item.click();
+      }
+    });
+
+    sbSearch.addEventListener('input', () => {
+      searchQuery = sbSearch.value;
+      renderSidebarList();
+    });
+    sbSort.addEventListener('change', () => {
+      sortMode = sbSort.value;
+      const p = loadPrefs(); p.sort = sortMode; savePrefs(p);
+      renderSidebarList();
+    });
+
+    document.getElementById('sb-new').addEventListener('click', () => createNewMap());
+    document.getElementById('sb-import').addEventListener('click', () => document.getElementById('file-input').click());
+    document.getElementById('sb-export-all').addEventListener('click', exportAllToFolder);
+    document.getElementById('sb-close').addEventListener('click', closeSidebar);
+    document.getElementById('sb-backdrop').addEventListener('click', closeSidebar);
+    document.getElementById('btn-sidebar').addEventListener('click', toggleSidebar);
+
+    // ════════════════════════════════════════════════════
+    // 7. コンテキストメニュー
+    // ════════════════════════════════════════════════════
+    let ctxOpenId = null;
+    function showContextMenu(anchor, id) {
+      const rect = anchor.getBoundingClientRect();
+      ctxOpenId = id;
+      ctxMenu.innerHTML = `
+        <button data-act="rename"><span>✏️</span><span>名前を変更</span></button>
+        <button data-act="duplicate"><span>📋</span><span>複製</span></button>
+        <button data-act="export"><span>📁</span><span>ファイルに保存</span></button>
+        <hr>
+        <button data-act="delete" class="danger"><span>🗑️</span><span>削除</span></button>
+      `;
+      // 表示してサイズを取得
+      ctxMenu.classList.add('open');
+      const mw = ctxMenu.offsetWidth;
+      const mh = ctxMenu.offsetHeight;
+      let left = rect.right - mw;
+      let top = rect.bottom + 4;
+      if (left < 8) left = 8;
+      if (top + mh > window.innerHeight - 8) top = rect.top - mh - 4;
+      ctxMenu.style.left = left + 'px';
+      ctxMenu.style.top = top + 'px';
+    }
+    function hideContextMenu() {
+      ctxMenu.classList.remove('open');
+      ctxOpenId = null;
+    }
+    ctxMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-act]');
+      if (!btn || !ctxOpenId) return;
+      const act = btn.getAttribute('data-act');
+      const id = ctxOpenId;
+      hideContextMenu();
+      const m = library.maps.find(x => x.id === id);
+      if (!m) return;
+      if (act === 'rename') renameMap(id);
+      else if (act === 'duplicate') duplicateMap(id);
+      else if (act === 'export') exportOneToFolder(m);
+      else if (act === 'delete') {
+        confirmAction('削除しますか？', `「${titleOf(m.markdown)}」を削除します。この操作は取り消せません。`, (ok) => {
+          if (ok) deleteMapConfirmed(id);
+        }, '削除する');
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (!ctxOpenId) return;
+      if (e.target.closest('.ctx-menu')) return;
+      if (e.target.closest('.map-item-menu-btn')) return;
+      hideContextMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && ctxOpenId) hideContextMenu();
+    });
+
+    // ════════════════════════════════════════════════════
+    // 8. Markdownパーサ
     // ════════════════════════════════════════════════════
     function parseMarkdown(md) {
       const lines = md.split(/\r?\n/);
@@ -706,7 +1242,7 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 7. テキスト幅計測 & レイアウト
+    // 9. テキスト計測 & レイアウト
     // ════════════════════════════════════════════════════
     function measureText(text, fontSize, weight) {
       const t = document.createElementNS(SVG_NS, 'text');
@@ -771,7 +1307,7 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 8. SVGビューポート
+    // 10. SVGビューポート
     // ════════════════════════════════════════════════════
     function resizeViewport() {
       const r = svg.getBoundingClientRect();
@@ -804,7 +1340,7 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 9. レンダリング
+    // 11. レンダリング
     // ════════════════════════════════════════════════════
     function el(tag, attrs) {
       const e = document.createElementNS(SVG_NS, tag);
@@ -839,7 +1375,6 @@
       allNodes.forEach(n => {
         const g = el('g', { class: 'node', 'data-id': n.id });
         if (selectedNodeId === n.id) g.setAttribute('class', 'node selected');
-
         const radius = n.lines.length > 1 ? Math.min(14, n.boxH / 4) : n.boxH / 2;
         g.appendChild(el('rect', {
           class: 'node-bg',
@@ -886,7 +1421,7 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 10. ノードの編集
+    // 12. ノード編集
     // ════════════════════════════════════════════════════
     function editNode(id) {
       const node = findById(id); if (!node) return;
@@ -926,7 +1461,7 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 11. 編集ダイアログ
+    // 13. ダイアログ
     // ════════════════════════════════════════════════════
     const dlg = document.getElementById('dialog-edit');
     const dlgInput = document.getElementById('dialog-input');
@@ -966,15 +1501,14 @@
       dlgInput.style.height = Math.min(dlgInput.scrollHeight + 4, window.innerHeight * 0.5) + 'px';
     });
 
-    // ════════════════════════════════════════════════════
-    // 12. 確認ダイアログ
-    // ════════════════════════════════════════════════════
     const confirmDlg = document.getElementById('dialog-confirm');
     let confirmCallback = null;
-    function confirmAction(title, msg, cb, okLabel = '削除する') {
+    function confirmAction(title, msg, cb, okLabel = 'OK') {
       document.getElementById('confirm-title').textContent = title;
       document.getElementById('confirm-msg').textContent = msg;
-      document.getElementById('confirm-ok').textContent = okLabel;
+      const okBtn = document.getElementById('confirm-ok');
+      okBtn.textContent = okLabel;
+      okBtn.classList.toggle('danger', okLabel === '削除する');
       confirmCallback = cb;
       if (typeof confirmDlg.showModal === 'function') confirmDlg.showModal();
     }
@@ -986,7 +1520,7 @@
     });
 
     // ════════════════════════════════════════════════════
-    // 13. ポインター操作（pan, ノードdrag, pinch）
+    // 14. ポインター操作（pan, ノードdrag, pinch）
     // ════════════════════════════════════════════════════
     const DRAG_THRESHOLD = 5;
     function svgPointFromClient(cx, cy) {
@@ -1176,7 +1710,7 @@
     svg.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // ════════════════════════════════════════════════════
-    // 14. テキスト入力支援
+    // 15. テキスト入力支援
     // ════════════════════════════════════════════════════
     function getLineRange(text, pos) {
       const start = text.lastIndexOf('\n', pos - 1) + 1;
@@ -1266,12 +1800,13 @@
     let renderTimer = null;
     function scheduleRender() {
       clearTimeout(renderTimer);
+      showSaving();
       renderTimer = setTimeout(() => { render(); flushCurrentMap(); }, 80);
     }
     editor.addEventListener('input', scheduleRender);
 
     // ════════════════════════════════════════════════════
-    // 15. 共有URL / .md ファイル操作
+    // 16. 共有URL / .md
     // ════════════════════════════════════════════════════
     function copyShareUrl() {
       const md = editor.value;
@@ -1307,9 +1842,6 @@
       toast(`${a.download} を保存しました`);
     }
 
-    // ════════════════════════════════════════════════════
-    // 16. File System Access API（フォルダ書き出し）
-    // ════════════════════════════════════════════════════
     function fsSupportsSave() { return typeof window.showSaveFilePicker === 'function'; }
     function fsSupportsDirectory() { return typeof window.showDirectoryPicker === 'function'; }
 
@@ -1329,10 +1861,8 @@
         if (e.name !== 'AbortError') toast('保存に失敗: ' + (e.message || e.name), true);
       }
     }
-
     async function exportAllToFolder() {
       if (!fsSupportsDirectory()) {
-        // fallback：全て個別にダウンロード
         if (!confirm(`このブラウザはフォルダ書き出し非対応です。\n${library.maps.length}個のマップを連続でダウンロードしますか？`)) return;
         for (const m of library.maps) downloadMarkdownFor(m);
         return;
@@ -1356,83 +1886,9 @@
     }
 
     // ════════════════════════════════════════════════════
-    // 17. ライブラリモーダル
-    // ════════════════════════════════════════════════════
-    const libDlg = document.getElementById('dialog-library');
-    function openLibrary() {
-      flushCurrentMap();
-      renderLibraryList();
-      const note = document.getElementById('lib-fs-note');
-      if (fsSupportsDirectory()) note.textContent = '✨ お使いのブラウザはフォルダ書き出しに対応';
-      else note.textContent = '※ Safari/iOSではダウンロード形式';
-      if (typeof libDlg.showModal === 'function') libDlg.showModal();
-    }
-    function closeLibrary() { libDlg.close(); }
-    document.getElementById('lib-close').addEventListener('click', closeLibrary);
-
-    function renderLibraryList() {
-      const list = document.getElementById('library-list');
-      list.innerHTML = '';
-      if (!library.maps || library.maps.length === 0) {
-        list.innerHTML = '<div class="empty">マップがありません</div>';
-        return;
-      }
-      const sorted = [...library.maps].sort((a, b) => b.updatedAt - a.updatedAt);
-      for (const m of sorted) {
-        const card = document.createElement('div');
-        card.className = 'map-card' + (m.id === library.currentId ? ' current' : '');
-        const t = titleOf(m.markdown);
-        const nc = nodeCountOf(m.markdown);
-        const isCur = m.id === library.currentId;
-        card.innerHTML = `
-          <div class="card-top">
-            ${isCur ? '<span class="badge">編集中</span>' : ''}
-            <div class="card-title">${escapeHtml(t)}</div>
-          </div>
-          <div class="card-meta">${formatDate(m.updatedAt)} 更新 · ${nc} ノード · ${m.markdown.length} 文字</div>
-          <div class="card-actions">
-            ${isCur ? '' : `<button data-action="open" data-id="${m.id}" class="primary">開く</button>`}
-            <button data-action="duplicate" data-id="${m.id}">複製</button>
-            <button data-action="export" data-id="${m.id}">${fsSupportsSave() ? '📁 保存' : '💾 .md'}</button>
-            <button data-action="delete" data-id="${m.id}" class="danger">削除</button>
-          </div>
-        `;
-        list.appendChild(card);
-      }
-    }
-    document.getElementById('library-list').addEventListener('click', async (e) => {
-      const btn = e.target.closest('button[data-action]'); if (!btn) return;
-      const id = btn.getAttribute('data-id');
-      const action = btn.getAttribute('data-action');
-      const map = library.maps.find(m => m.id === id);
-      if (!map) return;
-      if (action === 'open') {
-        openMap(id);
-        closeLibrary();
-      } else if (action === 'duplicate') {
-        duplicateMap(id);
-      } else if (action === 'export') {
-        await exportOneToFolder(map);
-      } else if (action === 'delete') {
-        confirmAction('削除しますか？', `「${titleOf(map.markdown)}」を削除します。この操作は取り消せません。`, (ok) => {
-          if (ok) deleteMapConfirmed(id);
-        });
-      }
-    });
-    document.getElementById('lib-new').addEventListener('click', () => {
-      createNewMap();
-      closeLibrary();
-    });
-    document.getElementById('lib-import').addEventListener('click', () => {
-      document.getElementById('file-input').click();
-    });
-    document.getElementById('lib-export-all').addEventListener('click', exportAllToFolder);
-
-    // ════════════════════════════════════════════════════
-    // 18. ヘッダーボタン
+    // 17. ヘッダーボタン
     // ════════════════════════════════════════════════════
     document.getElementById('btn-new').addEventListener('click', () => createNewMap());
-    document.getElementById('btn-library').addEventListener('click', openLibrary);
     document.getElementById('btn-share').addEventListener('click', copyShareUrl);
     document.getElementById('btn-toggle').addEventListener('click', () => {
       if (main.classList.contains('view-editor')) {
@@ -1449,14 +1905,14 @@
     document.getElementById('btn-zoom-out').addEventListener('click', () => zoomCentered(1 / 1.2));
     document.getElementById('btn-zoom-fit').addEventListener('click', () => { fitContent(); toast('全体を表示'); });
 
-    // ヘッダーのマップ名タップでタイトル編集
     mapTitleEl.addEventListener('click', () => {
-      // ルートノードを編集と同義
       if (!tree) return;
       editNode(tree.id);
     });
 
-    // ファイル取り込み
+    // ════════════════════════════════════════════════════
+    // 18. ファイル取り込み
+    // ════════════════════════════════════════════════════
     document.getElementById('file-input').addEventListener('change', (e) => {
       const files = e.target.files; if (!files || files.length === 0) return;
       let imported = 0;
@@ -1475,7 +1931,7 @@
           if (pending === 0) {
             saveLibrary();
             if (lastMap) setCurrentMap(lastMap);
-            renderLibraryList();
+            renderSidebarList();
             toast(`${imported} 個のマップを取り込みました`);
           }
         };
@@ -1491,26 +1947,47 @@
     function toast(msg, isError = false) {
       const t = document.getElementById('toast');
       t.textContent = msg;
-      t.style.background = isError ? '#dc2626' : '#1e293b';
+      t.style.background = isError ? 'var(--danger)' : 'var(--c0)';
       t.classList.add('show');
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
     }
 
     // ════════════════════════════════════════════════════
-    // 20. リサイズ & hashchange
+    // 20. キーボードショートカット
+    // ════════════════════════════════════════════════════
+    document.addEventListener('keydown', (e) => {
+      // ダイアログ表示中はスルー
+      if (document.querySelector('dialog[open]')) return;
+      // テキスト入力中の場合、特定のショートカットのみ
+      const isEditing = e.target === editor || e.target === dlgInput || e.target === sbSearch;
+      if ((e.metaKey || e.ctrlKey)) {
+        if (e.key === 'n' || e.key === 'N') {
+          e.preventDefault();
+          createNewMap();
+        } else if (e.key === '\\') {
+          e.preventDefault();
+          toggleSidebar();
+        } else if (e.key === 'f' || e.key === 'F') {
+          if (!isEditing) {
+            e.preventDefault();
+            openSidebar();
+            setTimeout(() => sbSearch.focus(), 320);
+          }
+        }
+      }
+    });
+
+    // ════════════════════════════════════════════════════
+    // 21. リサイズ・ハッシュ・終了
     // ════════════════════════════════════════════════════
     window.addEventListener('resize', () => { resizeViewport(); applyTransform(); });
     window.addEventListener('hashchange', () => { tryAcceptHash({ silent: false }); });
     window.addEventListener('beforeunload', () => flushCurrentMap());
 
-    // ════════════════════════════════════════════════════
-    // 21. URL hash受信：新規マップとしてライブラリへ追加
-    // ════════════════════════════════════════════════════
     function tryAcceptHash(opts = {}) {
       const md = loadFromHash();
       if (!md) return false;
-      // 重複チェック
       const dup = library.maps.find(m => m.markdown === md);
       if (dup) {
         flushCurrentMap();
@@ -1523,7 +2000,6 @@
         setCurrentMap(m);
         if (!opts.silent) toast('共有URLからライブラリに追加しました');
       }
-      // URLハッシュをクリア（重複追加防止）
       history.replaceState(null, '', location.pathname + location.search);
       return true;
     }
@@ -1533,25 +2009,30 @@
     // ════════════════════════════════════════════════════
     (function boot() {
       library = loadLibrary();
-      // hashがあれば優先処理
+      const prefs = loadPrefs();
+      if (prefs.sort) { sortMode = prefs.sort; sbSort.value = prefs.sort; }
+      applySidebarInitial();
+
       const hadHash = location.hash.length > 1;
       if (hadHash) {
-        // currentMapを一旦設定してからhashを取り込む（取り込み内でflushされるため）
         const c = library.maps.find(m => m.id === library.currentId) || library.maps[0];
         currentMap = c;
-        mutedSave = true;
-        editor.value = c.markdown;
-        mutedSave = false;
+        mutedSave = true; editor.value = c.markdown; mutedSave = false;
         tryAcceptHash({ silent: false });
       } else {
         const c = library.maps.find(m => m.id === library.currentId) || library.maps[0];
-        setCurrentMap(c);
+        setCurrentMap(c, { keepSidebar: true });
       }
+      renderSidebarList();
       requestAnimationFrame(() => {
         render();
         requestAnimationFrame(() => fitContent());
       });
     })();
+
+    // 相対時刻を定期更新
+    setInterval(() => renderSidebarList(), 60_000);
+
   </script>
 </body>
 </html>
